@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Docling Serve</Name>
+
+  <!-- Default image (you can change which branch is default in CA later) -->
+  <Repository>quay.io/docling-project/docling-serve</Repository>
+  <Registry>https://quay.io/repository/docling-project/docling-serve</Registry>
+
+  <!-- Use bridge by default so users don't need a custom network -->
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Shell>sh</Shell>
+
+  <!-- Required by CA: make Support a forum thread once you create it -->
+  <Support>https://forums.unraid.net/</Support>
+  <!-- Upstream project (server repo) -->
+  <Project>https://github.com/docling-project/docling-serve</Project>
+
+  <!-- Markdown only (no HTML) -->
+  <Overview>
+### What is Docling?
+Docling is an open-source toolkit (from IBM Research) that converts documents (PDF, DOCX, images, HTML, etc.) into structured Markdown or JSON. It’s great for RAG and local document processing.
+
+**Highlights**
+- Multi-format parsing with layout understanding and table extraction.
+- Simple API + optional Web UI.
+- Runs locally on your Unraid box; keep your data private.
+
+**Default Endpoints**
+- API: `http://[IP]:[PORT:5001]`
+- Docs: `http://[IP]:[PORT:5001]/docs`
+- Web UI: `http://[IP]:[PORT:5001]/ui` (set `DOCLING_SERVE_ENABLE_UI=1`)
+
+**Notes**
+- First run may download AI models; caches are persisted to appdata so subsequent starts are faster.
+  </Overview>
+
+  <!-- IMPORTANT: use the *container* port here; CA maps the host port -->
+  <WebUI>http://[IP]:[PORT:5001]/ui</WebUI>
+
+  <!-- once this file lives in your template repo, CA will fill in the raw URL -->
+  <TemplateURL></TemplateURL>
+
+  <!-- recommend hosting this icon in your template repo under /icons/docling.png -->
+  <Icon>https://raw.githubusercontent.com/docling-project/docling/refs/heads/main/docs/assets/logo.png</Icon>
+
+  <!-- Better discovery in CA -->
+  <ExtraSearchTerms>ocr;pdf;docx;markdown;json;table extraction;layout;document ai;rag</ExtraSearchTerms>
+
+  <!-- Primary categories; use semicolons between categories -->
+  <Category>Productivity:AI;Network:Web;Tools:Utilities</Category>
+
+  <!-- Optional pre-install note users will see -->
+  <Requires>
+**GPU (optional):**
+- Install the NVIDIA Driver plugin and reboot.
+- Choose a CUDA branch below (e.g., cu128) and add `--gpus all` in Extra Parameters.
+  </Requires>
+
+  <!-- Offer multiple variants as selectable "branches" in CA -->
+  <Branch>
+    <Tag>latest</Tag>
+    <TagDescription>Base image (amd64/arm64)</TagDescription>
+    <Repository>quay.io/docling-project/docling-serve</Repository>
+  </Branch>
+  <Branch>
+    <Tag>cpu</Tag>
+    <TagDescription>CPU-only (no CUDA required)</TagDescription>
+    <Repository>quay.io/docling-project/docling-serve-cpu</Repository>
+  </Branch>
+  <Branch>
+    <Tag>cu128</Tag>
+    <TagDescription>CUDA 12.8 (GPU)</TagDescription>
+    <Repository>quay.io/docling-project/docling-serve-cu128</Repository>
+  </Branch>
+  <Branch>
+    <Tag>cu126</Tag>
+    <TagDescription>CUDA 12.6 (GPU)</TagDescription>
+    <Repository>quay.io/docling-project/docling-serve-cu126</Repository>
+  </Branch>
+
+  <!-- Ports -->
+  <Config Name="WebUI Port" Target="5001" Default="5001" Mode="tcp" Description="Docling Serve API/UI port" Type="Port" Display="always" Required="true" />
+
+  <!-- Persistent caches (your paths looked good; I simplified the defaults) -->
+  <Config Name="HuggingFace Cache" Target="/opt/app-root/src/.cache/docling" Default="/mnt/user/appdata/docling/huggingface_cache" Mode="rw" Description="Caches downloaded AI models" Type="Path" Display="always" Required="false" />
+  <Config Name="EasyOCR Cache" Target="/opt/app-root/.EasyOCR" Default="/mnt/user/appdata/docling/easyocr_cache" Mode="rw" Description="Caches OCR models" Type="Path" Display="advanced" Required="false" />
+
+  <!-- Environment -->
+  <Config Name="Enable UI" Target="DOCLING_SERVE_ENABLE_UI" Default="1" Description="Enable the /ui playground (1/0)" Type="Variable" Display="always" Required="true" />
+  <Config Name="Allow model downloads" Target="DOCLING_SERVE_ALLOW_DOWNLOADS" Default="1" Description="Allow Docling/EasyOCR to auto-download models (1/0)" Type="Variable" Display="advanced" Required="false" />
+  <Config Name="Image-to-Text Model" Target="DOCLING_SERVE_IMAGE_TO_TEXT_MODEL" Default="HuggingFaceTB/SmolVLM-256M-Instruct" Description="VLM used for image-to-text" Type="Variable" Display="advanced" Required="false" />
+  <Config Name="Picture Classification Model" Target="DOCLING_SERVE_PICTURE_CLASSIFICATION_MODEL" Default="ds4sd/DocumentFigureClassifier" Description="Figure/diagram classifier" Type="Variable" Display="advanced" Required="false" />
+
+  <!-- Typical Unraid uid/gid defaults -->
+  <Config Name="PUID" Target="PUID" Default="99" Type="Variable" Display="advanced" Required="false" />
+  <Config Name="PGID" Target="PGID" Default="100" Type="Variable" Display="advanced" Required="false" />
+
+  <!-- Optional NVIDIA vars (not strictly required when using --gpus all, but some users like them) -->
+  <Config Name="NVIDIA_VISIBLE_DEVICES" Target="NVIDIA_VISIBLE_DEVICES" Default="all" Type="Variable" Display="advanced" Required="false" />
+  <Config Name="NVIDIA_DRIVER_CAPABILITIES" Target="NVIDIA_DRIVER_CAPABILITIES" Default="compute,utility" Type="Variable" Display="advanced" Required="false" />
+</Container>

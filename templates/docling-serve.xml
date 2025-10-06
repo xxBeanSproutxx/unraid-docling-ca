@@ -33,7 +33,7 @@ Docling is an open-source toolkit (from IBM Research) that converts documents (P
   <TemplateURL></TemplateURL>
   <Icon>https://raw.githubusercontent.com/docling-project/docling/refs/heads/main/docs/assets/logo.png</Icon>
   <ExtraSearchTerms>ocr;pdf;docx;markdown;json;table extraction;layout;document ai;rag</ExtraSearchTerms>
-  <Category>Productivity:AI;Network:Web;Tools:Utilities</Category>
+  <Category>AI: Productivity:</Category>
 
   <Requires>
 **GPU (optional):**

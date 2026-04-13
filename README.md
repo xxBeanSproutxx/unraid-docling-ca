@@ -30,4 +30,4 @@ If startup logs show model-not-found errors, work through these checks:
 
 4. **Expect first-run warmup delay**
    - Initial startup may take longer while models are downloaded.
-   - With `DOCLING_SERVE_LOAD_MODELS_AT_BOOT=true`, failures surface early in logs instead of on the first OCR request.
+   - With `DOCLING_SERVE_LOAD_MODELS_AT_BOOT=true`, failures surface early in logs instead of you finding out on the first OCR request.

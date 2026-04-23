@@ -12,7 +12,7 @@
 
   <Overview>
 ### What is Docling?
-Docling is an open-source toolkit (from IBM Research) that converts documents (PDF, DOCX, images, HTML, etc.) into structured Markdown or JSON. It’s great for RAG and local document processing.
+Docling is an open-source toolkit (from IBM Research) that converts documents (PDF, DOCX, images, HTML, etc.) into structured Markdown or JSON. It's great for RAG and local document processing.
 
 **Highlights**
 - Multi-format parsing with layout understanding and table extraction.
@@ -24,10 +24,15 @@ Docling is an open-source toolkit (from IBM Research) that converts documents (P
 - Docs: `http://[IP]:[PORT:5001]/docs`
 - Web UI: `http://[IP]:[PORT:5001]/ui` (set `DOCLING_SERVE_ENABLE_UI=1`)
 
-**Notes**
+**First-Run Model Download**
+- On a fresh install the models directory will be empty. Docling must download RapidOCR and other artifacts on first boot.
+- Make sure `DOCLING_SERVE_ENABLE_REMOTE_SERVICES` is set to `true` for the very first start so downloads can reach upstream model hosts (e.g. modelscope.cn).
+- After the first successful start and model cache is populated, you may set `DOCLING_SERVE_ENABLE_REMOTE_SERVICES` back to `false` if you prefer a fully local-only deployment.
+- Keep `DOCLING_SERVE_LOAD_MODELS_AT_BOOT=true` so any download failures show up immediately in startup logs rather than at first OCR request.
+
+**Persistent Paths**
 - Models/artifacts are persisted in appdata so restarts do not re-download everything.
 - If logs show `artifacts_path is set to an invalid directory`, verify the models path exists and matches `DOCLING_SERVE_ARTIFACTS_PATH`.
-- Keep `DOCLING_SERVE_LOAD_MODELS_AT_BOOT=true` for first-run validation so model download issues are visible in startup logs.
   </Overview>
 
   <WebUI>http://[IP]:[PORT:5001]/ui</WebUI>
@@ -37,11 +42,15 @@ Docling is an open-source toolkit (from IBM Research) that converts documents (P
   <Category>AI: Productivity:</Category>
 
   <Requires>
-**GPU (optional):**
+**CPU-only deployments**
+- Select the `cpu` branch (`quay.io/docling-project/docling-serve-cpu`) for CPU-only operation.
+- `DOCLING_DEVICE=cpu` is a runtime hint; it does NOT replace choosing the CPU image branch.
+
+**GPU deployments (NVIDIA, optional)**
 - Install the NVIDIA Driver plugin and reboot.
 - Add `--gpus all` in Extra Parameters.
 - If GPU is detected but jobs still run on CPU, try branch `cu126` (better compatibility on some older driver stacks) or update NVIDIA drivers.
-- Optional advanced variable: set `DOCLING_DEVICE=cuda` (or `cuda:0`) to force GPU execution.
+- Optional: set `DOCLING_DEVICE=cuda` (or `cuda:0`) to force GPU execution.
   </Requires>
 
   <Branch>
@@ -71,8 +80,9 @@ Docling is an open-source toolkit (from IBM Research) that converts documents (P
   <Config Name="EasyOCR Cache" Target="/opt/app-root/.EasyOCR" Default="/mnt/user/appdata/docling/easyocr_cache" Mode="rw" Description="Caches OCR models" Type="Path" Display="advanced" Required="false" />
   <Config Name="Enable UI" Target="DOCLING_SERVE_ENABLE_UI" Default="1" Description="Enable the /ui playground (1/0)" Type="Variable" Display="always" Required="true" />
   <Config Name="Load Models At Boot" Target="DOCLING_SERVE_LOAD_MODELS_AT_BOOT" Default="true" Description="Preload/download models at startup (recommended for easier first-run diagnostics)." Type="Variable" Display="advanced" Required="false" />
+  <Config Name="Enable Remote Services" Target="DOCLING_SERVE_ENABLE_REMOTE_SERVICES" Default="false" Description="Allow remote model/service calls. Set to true for first run so missing models can download; set back to false after cache is populated." Type="Variable" Display="advanced" Required="false" />
   <Config Name="Artifacts Path (env)" Target="DOCLING_SERVE_ARTIFACTS_PATH" Default="/opt/app-root/src/.cache/docling/models" Description="Directory used by Docling to load/store model artifacts" Type="Variable" Display="advanced" Required="false" />
-  <Config Name="Force Device" Target="DOCLING_DEVICE" Default="" Description="Optional: cpu, cuda, cuda:0, mps. Leave blank for auto-detect." Type="Variable" Display="advanced" Required="false" />
+  <Config Name="Force Device" Target="DOCLING_DEVICE" Default="auto" Description="Runtime device: auto, cpu, cuda, cuda:0, mps. Use 'auto' to let Docling decide. For CPU-only, select the cpu image branch above." Type="Variable" Display="advanced" Required="false" />
   <Config Name="Image-to-Text Model" Target="DOCLING_SERVE_IMAGE_TO_TEXT_MODEL" Default="HuggingFaceTB/SmolVLM-256M-Instruct" Description="VLM used for image-to-text" Type="Variable" Display="advanced" Required="false" />
   <Config Name="Picture Classification Model" Target="DOCLING_SERVE_PICTURE_CLASSIFICATION_MODEL" Default="ds4sd/DocumentFigureClassifier" Description="Figure/diagram classifier" Type="Variable" Display="advanced" Required="false" />
   <Config Name="PUID" Target="PUID" Default="99" Type="Variable" Display="advanced" Required="false" />
